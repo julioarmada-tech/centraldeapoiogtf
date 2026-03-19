@@ -223,6 +223,7 @@ tbody td.tdl{min-width:260px;max-width:400px;font-size:12px;color:var(--tx2);whi
     <div class="mcard" onclick="showPage('veiculo_reserva')"><div class="mcard-ico tbl">🚗</div><div style="flex:1;min-width:0"><div class="mcard-title">Procedimento Veículo Reserva</div><div class="mcard-sub">Passo a passo por etapa</div><span class="badge-tbl">Tabela</span></div><div class="mcard-arr">›</div></div>
     <div class="mcard" onclick="showPage('controlador')"><div class="mcard-ico tbl">🎛️</div><div style="flex:1;min-width:0"><div class="mcard-title">Controlador</div><div class="mcard-sub">Centro de custo e orientação</div><span class="badge-tbl">Tabela</span></div><div class="mcard-arr">›</div></div>
     <div class="mcard" onclick="showPage('nps')"><div class="mcard-ico tbl">📊</div><div style="flex:1;min-width:0"><div class="mcard-title">Pesquisa NPS</div><div class="mcard-sub">Gera link NPS por chamado e placa</div><span class="badge-tbl">Gerador</span></div><div class="mcard-arr">›</div></div>
+    <div class="mcard" onclick="showPage('voucher')"><div class="mcard-ico tbl">📋</div><div style="flex:1;min-width:0"><div class="mcard-title">Padrão Liberação de Reserva</div><div class="mcard-sub">Gera voucher de veículo reserva</div><span class="badge-tbl">Gerador</span></div><div class="mcard-arr">›</div></div>
   </div>
 </div>
 
@@ -470,6 +471,53 @@ tbody td.tdl{min-width:260px;max-width:400px;font-size:12px;color:var(--tx2);whi
   <div id="gl-links-list"></div>
   <div id="gl-empty">
     <div class="ecrd"><div class="eico">📊</div><div class="etitle">Nenhum link gerado ainda</div><div class="esub">Preencha chamado e placa e clique em Gerar Link</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ VOUCHER RESERVA ═══════════════════ -->
+<div class="page" id="page-voucher">
+  <div class="mod-hdr"><div class="mod-ico">📋</div><div><div class="mod-title">Padrão Liberação de Reserva</div><div class="mod-sub">Preencha os campos e gere o voucher</div></div></div>
+  <div class="sbox">
+    <span class="slbl">📝 Dados do Voucher</span>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:14px">
+      <div>
+        <div class="flbl" style="margin-bottom:6px">Voucher (número)</div>
+        <input class="sinp" id="vc-voucher" placeholder="Ex: 123456" style="width:100%"/>
+      </div>
+      <div>
+        <div class="flbl" style="margin-bottom:6px">Loja Movida</div>
+        <input class="sinp" id="vc-loja" placeholder="Ex: Movida Paulista" style="width:100%"/>
+      </div>
+      <div>
+        <div class="flbl" style="margin-bottom:6px">Endereço</div>
+        <input class="sinp" id="vc-endereco" placeholder="Ex: Av. Paulista, 1000 - SP" style="width:100%"/>
+      </div>
+      <div>
+        <div class="flbl" style="margin-bottom:6px">Data de Retirada</div>
+        <input class="sinp" id="vc-retirada" placeholder="Ex: 20/03/2026 às 10:00" style="width:100%"/>
+      </div>
+      <div>
+        <div class="flbl" style="margin-bottom:6px">Data de Devolução</div>
+        <input class="sinp" id="vc-devolucao" placeholder="Ex: 25/03/2026 às 10:00" style="width:100%"/>
+      </div>
+      <div>
+        <div class="flbl" style="margin-bottom:6px">Grupo</div>
+        <input class="sinp" id="vc-grupo" placeholder="Ex: Hatch Médio" style="width:100%"/>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-srch" onclick="gerarVoucher()">📋 Gerar Voucher</button>
+      <button onclick="limparVoucher()" style="background:transparent;border:1px solid var(--bdr);color:var(--tx2);border-radius:9px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">✕ Limpar</button>
+    </div>
+  </div>
+  <div id="vc-result" style="display:none">
+    <div class="rcard" style="border-left-color:var(--or)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+        <div class="flbl" style="margin:0;color:var(--or)">✅ Voucher gerado</div>
+        <button onclick="copiarVoucher()" style="background:var(--or);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📋 Copiar texto</button>
+      </div>
+      <div id="vc-texto" style="background:var(--bg3);border-radius:9px;padding:18px;font-size:14px;color:var(--tx);line-height:1.9;white-space:pre-wrap;word-break:break-word;border:1px solid var(--bdr)"></div>
+    </div>
   </div>
 </div>
 
@@ -726,7 +774,7 @@ var TITLES={
   contatos:'Contatos',scripts:'Scripts',regionais:'Regionais',workflow:'Workflow',
   desmobilizacao:'Desmobilização',crlv:'CRLV',upgrade:'Upgrade / Reserva',
   sublocacao:'Dúvidas Sublocação',veiculo_reserva:'Veículo Reserva',
-  controlador:'Controlador',nps:'Pesquisa NPS'
+  controlador:'Controlador',nps:'Pesquisa NPS',voucher:'Padrão Liberação de Reserva'
 };
 function showPage(id){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
@@ -1203,6 +1251,84 @@ function cpLink(iid){
 function showCpOk(iid){
   var el=document.getElementById('cpok'+iid);if(!el)return;
   el.style.display='inline';setTimeout(function(){el.style.display='none';},2000);
+}
+
+// ── VOUCHER RESERVA ────────────────────────────────────────────────────────
+var TEMPLATE_VOUCHER = [
+  'Olá! Tudo bem?',
+  '',
+  'Temos uma ótima notícia para você: sua solicitação de Veículo Reserva foi aprovada!',
+  '',
+  'Você já pode se programar para fazer a retirada conforme as informações abaixo:',
+  '',
+  'Reserva (Voucher): XXXX1',
+  'Local de retirada: XXXX2',
+  'Endereço: XXXX3',
+  'Data de retirada: XXXX4 (a retirada pode ser feita até uma hora antes do horário agendado ou uma hora depois)',
+  'Data de devolução: XXXX5',
+  'Grupo: XXXX6',
+  '',
+  'Importante saber:',
+  '',
+  'Na retirada:',
+  'Apresente sua CNH válida.',
+  'Se atente ao horário de funcionamento da loja escolhida.',
+  'A reserva é sem custo, mas caso haja despesas extras (como multas, avarias, combustível ou uso do Sem Parar), os valores serão repassados.',
+  '',
+  'Na devolução:',
+  'O veículo reserva deve ser devolvido em até 24h após o efetivo estar pronto, no mesmo local da retirada.',
+  '',
+  'Se o efetivo ainda não estiver pronto até a data prevista, você poderá continuar com o veículo reserva, respeitando o saldo de diárias contratado pela sua empresa, caso contrário deve entrar em contato com a nossa central e solicitar análise para prorrogação da data para devolução.',
+  '',
+  'Se precisar de qualquer ajuda ou tiver dúvidas, estamos à disposição pelo 0800 722 2212 (também é WhatsApp!).',
+  '',
+  'Atenciosamente,',
+  'Equipe Movida Frotas'
+].join('\n');
+
+function gerarVoucher(){
+  var voucher   = document.getElementById('vc-voucher').value.trim();
+  var loja      = document.getElementById('vc-loja').value.trim();
+  var endereco  = document.getElementById('vc-endereco').value.trim();
+  var retirada  = document.getElementById('vc-retirada').value.trim();
+  var devolucao = document.getElementById('vc-devolucao').value.trim();
+  var grupo     = document.getElementById('vc-grupo').value.trim();
+
+  if(!voucher||!loja||!endereco||!retirada||!devolucao||!grupo){
+    alert('Preencha todos os campos antes de gerar o voucher.');
+    return;
+  }
+
+  var texto = TEMPLATE_VOUCHER
+    .replace('XXXX1', voucher)
+    .replace('XXXX2', loja)
+    .replace('XXXX3', endereco)
+    .replace('XXXX4', retirada)
+    .replace('XXXX5', devolucao)
+    .replace('XXXX6', grupo);
+
+  document.getElementById('vc-texto').textContent = texto;
+  document.getElementById('vc-result').style.display = 'block';
+  document.getElementById('vc-result').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function copiarVoucher(){
+  var txt = document.getElementById('vc-texto').textContent;
+  navigator.clipboard.writeText(txt).then(function(){
+    mostrarToast('Voucher copiado! ✓');
+  }).catch(function(){
+    var ta=document.createElement('textarea');ta.value=txt;
+    document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
+    mostrarToast('Voucher copiado! ✓');
+  });
+}
+
+function limparVoucher(){
+  ['vc-voucher','vc-loja','vc-endereco','vc-retirada','vc-devolucao','vc-grupo'].forEach(function(id){
+    document.getElementById(id).value='';
+  });
+  document.getElementById('vc-result').style.display='none';
 }
 </script>
 </body>
