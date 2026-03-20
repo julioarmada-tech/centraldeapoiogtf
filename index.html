@@ -141,6 +141,14 @@ tbody td{padding:13px 15px;color:var(--tx);vertical-align:top;line-height:1.6;wo
 tbody td.tdl{min-width:260px;max-width:400px;font-size:12px;color:var(--tx2);white-space:pre-wrap}
 
 @keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.ptab{background:var(--bg2);border:1px solid var(--bdr);color:var(--tx2);border-radius:9px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .18s}
+.ptab:hover{border-color:var(--or);color:var(--or)}
+.ptab-active{background:var(--or);color:#fff;border-color:var(--or)}
+.ptab-active:hover{background:var(--ord);color:#fff}
+.pit-uf-btn{background:var(--bg2);border:1.5px solid var(--bdr);color:var(--tx2);border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
+.pit-uf-btn:hover,.pit-uf-btn.active{background:var(--or);color:#fff;border-color:var(--or)}
+.pit-cidade-btn{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx);border-radius:8px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.pit-cidade-btn:hover,.pit-cidade-btn.active{background:var(--or);color:#fff;border-color:var(--or)}
 /* LOGIN */
 #login-screen{position:fixed;inset:0;background:#1e2535;z-index:99999;display:flex;align-items:center;justify-content:center}
 .login-box{background:#252e40;border:1px solid rgba(255,102,0,.25);border-radius:16px;padding:40px 36px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
@@ -223,6 +231,19 @@ tbody td.tdl{min-width:260px;max-width:400px;font-size:12px;color:var(--tx2);whi
     <div class="mcard" onclick="showPage('veiculo_reserva')"><div class="mcard-ico tbl">🚗</div><div style="flex:1;min-width:0"><div class="mcard-title">Procedimento Veículo Reserva</div><div class="mcard-sub">Passo a passo por etapa</div><span class="badge-tbl">Tabela</span></div><div class="mcard-arr">›</div></div>
     <div class="mcard" onclick="showPage('controlador')"><div class="mcard-ico tbl">🎛️</div><div style="flex:1;min-width:0"><div class="mcard-title">Controlador</div><div class="mcard-sub">Centro de custo e orientação</div><span class="badge-tbl">Tabela</span></div><div class="mcard-arr">›</div></div>
     <div class="mcard" onclick="showPage('nps')"><div class="mcard-ico tbl">📊</div><div style="flex:1;min-width:0"><div class="mcard-title">Pesquisa NPS</div><div class="mcard-sub">Gera link NPS por chamado e placa</div><span class="badge-tbl">Gerador</span></div><div class="mcard-arr">›</div></div>
+  </div>
+  <div style="margin-top:24px">
+    <div class="sec-lbl" style="color:var(--or)">🏁 Pit Stop Movida</div>
+    <div class="mcard" id="card-pitstop" onclick="showPage('pitstop')" style="background:linear-gradient(135deg,rgba(255,102,0,.18),rgba(255,102,0,.08));border:2px solid var(--or);border-radius:14px;padding:20px;margin-top:0">
+      <div style="width:48px;height:48px;border-radius:12px;background:var(--or);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🏁</div>
+      <div style="flex:1;min-width:0">
+        <div class="mcard-title" style="font-size:16px;color:var(--or)">Pit Stop Movida</div>
+        <div class="mcard-sub" style="margin-top:3px">Script de oferta · Informações das unidades · Serviços realizados</div>
+      </div>
+      <div class="mcard-arr" style="color:var(--or);font-size:22px">›</div>
+    </div>
+  </div>
+  <div style="display:none">
     <div class="mcard" onclick="showPage('voucher')"><div class="mcard-ico tbl">📋</div><div style="flex:1;min-width:0"><div class="mcard-title">Padrão Liberação de Reserva</div><div class="mcard-sub">Gera voucher de veículo reserva</div><span class="badge-tbl">Gerador</span></div><div class="mcard-arr">›</div></div>
   </div>
 </div>
@@ -294,7 +315,8 @@ tbody td.tdl{min-width:260px;max-width:400px;font-size:12px;color:var(--tx2);whi
     <span class="slbl">🔎 Pesquisar</span>
     <div class="srow">
       <select class="ssel" id="sc-tipo" onchange="updateScripts()"><option value="">Todos os tipos</option></select>
-      <select class="ssel" id="sc-sol"><option value="">Selecione a solicitação</option></select>
+      <select class="ssel" id="sc-sol" onchange="updateScUF()"><option value="">Selecione a solicitação</option></select>
+      <select class="ssel" id="sc-uf" style="display:none"><option value="">Selecione a UF</option></select>
       <button class="btn-srch" onclick="searchScript()">Buscar</button>
     </div>
   </div>
@@ -521,6 +543,75 @@ tbody td.tdl{min-width:260px;max-width:400px;font-size:12px;color:var(--tx2);whi
   </div>
 </div>
 
+<!-- ═══════════════════ PIT STOP ═══════════════════ -->
+<div class="page" id="page-pitstop">
+  <div class="mod-hdr">
+    <div class="mod-ico" style="background:var(--or);border-color:var(--or)">🏁</div>
+    <div><div class="mod-title" style="color:var(--or)">Pit Stop Movida</div><div class="mod-sub">Script de oferta · Informações · Serviços realizados</div></div>
+  </div>
+  <!-- 3 botões internos -->
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px">
+    <button onclick="pitTab('script')" id="ptab-script" class="ptab ptab-active">📢 Script de Oferta</button>
+    <button onclick="pitTab('info')"   id="ptab-info"   class="ptab">📍 Informações dos Pit Stop</button>
+    <button onclick="pitTab('servico')" id="ptab-servico" class="ptab">🔧 Serviços Realizados</button>
+  </div>
+
+  <!-- Aba: Script -->
+  <div id="pit-script">
+    <div class="rcard" style="border-left-color:var(--or)">
+      <div style="margin-bottom:14px">
+        <div class="grp-lbl">Script de Oferta — Pit Stop Movida</div>
+      </div>
+      <div id="pit-script-texto" class="tblock" style="font-size:14px;line-height:1.8"></div>
+    </div>
+  </div>
+
+  <!-- Aba: Informações -->
+  <div id="pit-info" style="display:none">
+    <div class="sbox" style="margin-bottom:18px">
+      <span class="slbl">📍 Selecione a UF</span>
+      <div id="pit-ufs" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:0"></div>
+    </div>
+    <div id="pit-cidades" style="display:none">
+      <div class="sbox" style="margin-bottom:18px">
+        <span class="slbl" id="pit-cidades-label">Cidades</span>
+        <div id="pit-cidades-btns" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      </div>
+    </div>
+    <div id="pit-info-results"></div>
+  </div>
+
+  <!-- Aba: Serviços -->
+  <div id="pit-servico" style="display:none">
+    <div class="sbox" style="margin-bottom:18px">
+      <span class="slbl">🔧 Buscar serviço</span>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <!-- Campo Parte -->
+        <div>
+          <div class="flbl" style="margin-bottom:6px">Parte</div>
+          <div class="ac-wrap">
+            <input class="sinp" id="pit-parte-inp" placeholder="Selecione ou digite a parte..." autocomplete="off"
+              oninput="pitParteKw(this.value)" onfocus="pitParteKw(this.value)"/>
+            <div class="ac-list" id="pit-parte-list"></div>
+          </div>
+        </div>
+        <!-- Campo Sintoma -->
+        <div>
+          <div class="flbl" style="margin-bottom:6px">Sintoma</div>
+          <div class="ac-wrap">
+            <input class="sinp" id="pit-sintoma-inp" placeholder="Selecione ou digite o sintoma..." autocomplete="off"
+              oninput="pitSintomaKw(this.value)" onfocus="pitSintomaKw(this.value)"/>
+            <div class="ac-list" id="pit-sintoma-list"></div>
+          </div>
+        </div>
+      </div>
+      <button onclick="pitLimpar()" style="background:transparent;border:1px solid var(--bdr);color:var(--tx2);border-radius:9px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s" onmouseover="this.style.borderColor='var(--or)';this.style.color='var(--or)'" onmouseout="this.style.borderColor='var(--bdr)';this.style.color='var(--tx2)'">✕ Limpar</button>
+    </div>
+    <div id="pit-servico-results"></div>
+  </div>
+</div>
+
+
 <script>
 // ── DADOS ─────────────────────────────────────────────────────────────────
 
@@ -546,6 +637,8 @@ var ABAS = {
   sublocacao:      'Sublocação',
   veiculo_reserva: 'Veículo Reserva',
   desmobilizacao:  'Desmobilização',
+  pit_stop:        'Pit Stop',
+  servicos_pit:    'Serviços Pit Stop',
   controlador:     'Controlador'
 };
 
@@ -774,7 +867,7 @@ var TITLES={
   contatos:'Contatos',scripts:'Scripts',regionais:'Regionais',workflow:'Workflow',
   desmobilizacao:'Desmobilização',crlv:'CRLV',upgrade:'Upgrade / Reserva',
   sublocacao:'Dúvidas Sublocação',veiculo_reserva:'Veículo Reserva',
-  controlador:'Controlador',nps:'Pesquisa NPS',voucher:'Padrão Liberação de Reserva'
+  controlador:'Controlador',nps:'Pesquisa NPS',voucher:'Padrão Liberação de Reserva',pitstop:'Pit Stop Movida'
 };
 function showPage(id){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
@@ -787,6 +880,7 @@ function showPage(id){
   if(id==='sublocacao')    renderSublocacao();
   if(id==='veiculo_reserva') renderVeiculoReserva();
   if(id==='controlador')   renderControlador();
+  if(id==='pitstop')       { pitTab('script'); }
 }
 
 // ── HELPERS ────────────────────────────────────────────────────────────────
@@ -1027,11 +1121,77 @@ function updateScripts(){
   var sel=document.getElementById('sc-sol');
   sel.innerHTML='<option value="">Selecione a solicitação</option>';
   sols.forEach(function(s){sel.innerHTML+='<option value="'+E(s)+'">'+E(s)+'</option>';});
+  // Resetar UF ao trocar tipo
+  document.getElementById('sc-uf').style.display='none';
+  document.getElementById('sc-uf').innerHTML='<option value="">Selecione a UF</option>';
+}
+function updateScUF(){
+  var sol=document.getElementById('sc-sol').value;
+  var selUF=document.getElementById('sc-uf');
+  // Só mostra UF se for Pit Stop
+  if(sol==='Script - Oferta de Pit Stop Movida'){
+    var ufs=[...new Set((GTF.pit_stop||[]).map(function(r){return r.UF||r.uf||'';}))].filter(Boolean).sort();
+    selUF.innerHTML='<option value="">Selecione a UF</option>';
+    ufs.forEach(function(u){selUF.innerHTML+='<option value="'+E(u)+'">'+E(u)+'</option>';});
+    selUF.style.display='';
+  } else {
+    selUF.style.display='none';
+    selUF.innerHTML='<option value="">Selecione a UF</option>';
+  }
 }
 window._sc_data=[];
 function searchScript(){
   var sol=document.getElementById('sc-sol').value;
   if(!sol){noRes('sc-results');return;}
+
+  // Pit Stop — exibe lojas da UF selecionada + resposta do script
+  if(sol==='Script - Oferta de Pit Stop Movida'){
+    var uf=document.getElementById('sc-uf').value;
+    if(!uf){
+      document.getElementById('sc-results').innerHTML='<div class="ecrd"><div class="eico">📍</div><div class="etitle">Selecione a UF</div><div class="esub">Escolha o estado para ver as unidades Pit Stop disponíveis</div></div>';
+      return;
+    }
+    var lojas=(GTF.pit_stop||[]).filter(function(r){return (r.UF||r.uf||'')=== uf;});
+    var resScript=GTF.scripts.filter(function(r){return r.SOLICITAÇÃO===sol;});
+    var h='<div class="rmeta"><span class="rcnt">'+lojas.length+' unidade'+(lojas.length!==1?'s':'')+' Pit Stop em '+E(uf)+'</span></div>';
+    // Resposta do script com botão copiar
+    if(resScript.length){
+      window._sc_data=resScript;
+      var bid='scb0';
+      h+='<div class="rcard">';
+      h+='<div class="flbl">Tipo</div><div class="fval" style="margin-bottom:6px">'+E(resScript[0]['Padrão ou Script'])+'</div>';
+      h+='<div class="flbl">Solicitação</div><div class="fval big" style="margin-bottom:10px">'+E(resScript[0].SOLICITAÇÃO)+'</div>';
+      h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div class="flbl" style="margin:0">Resposta</div>';
+      h+='<button id="'+bid+'" onclick="copiarScript(\''+bid+'\',0)" style="background:transparent;border:1px solid var(--bdr);color:var(--tx2);border-radius:7px;padding:4px 11px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">📋 Copiar</button></div>';
+      h+='<div class="tblock">'+E(resScript[0].Resposta)+'</div></div>';
+    }
+    // Lojas Pit Stop
+    if(!lojas.length){
+      h+='<div class="ecrd"><div class="eico">📍</div><div class="etitle">Nenhuma unidade encontrada para '+E(uf)+'</div></div>';
+    } else {
+      lojas.forEach(function(r){
+        var nome  = r['Nome do fornecedor']||r['nome do fornecedor']||'';
+        var end   = r['Endereço']||r['endereço']||r['Endereco']||'';
+        var bairro= r['Bairro']||r['bairro']||'';
+        var cidade= r['Cidade']||r['cidade']||'';
+        var ref   = r['Referência']||r['referência']||r['Referencia']||'';
+        var hor   = r['Horário de funcionamento']||r['horário de funcionamento']||r['Horario de funcionamento']||'';
+        h+='<div class="rcard">';
+        h+='<div class="rgrid" style="margin-bottom:12px">';
+        h+='<div style="grid-column:1/-1"><div class="flbl">Nome</div><div class="fval big">'+E(nome)+'</div></div>';
+        h+='<div><div class="flbl">Cidade / Bairro</div><div class="fval">'+E(cidade)+(bairro?' — '+E(bairro):'')+'</div></div>';
+        h+='<div><div class="flbl">UF</div><div class="fval"><span class="bplaca">'+E(uf)+'</span></div></div>';
+        if(ref) h+='<div style="grid-column:1/-1"><div class="flbl">Referência</div><div class="fval">'+E(ref)+'</div></div>';
+        h+='<div style="grid-column:1/-1"><div class="flbl">Endereço</div><div class="fval">'+E(end)+'</div></div>';
+        h+='<div style="grid-column:1/-1"><div class="flbl">Horário de Funcionamento</div><div class="fval">'+E(hor)+'</div></div>';
+        h+='</div></div>';
+      });
+    }
+    document.getElementById('sc-results').innerHTML=h;
+    return;
+  }
+
+  // Demais scripts — comportamento normal
   var res=GTF.scripts.filter(function(r){return r.SOLICITAÇÃO===sol;});
   if(!res.length){noRes('sc-results');return;}
   window._sc_data=res;
@@ -1330,6 +1490,187 @@ function limparVoucher(){
   });
   document.getElementById('vc-result').style.display='none';
 }
+
+// ── PIT STOP ───────────────────────────────────────────────────────────────
+var _pitScriptTxt = 'Para agilizar sua manutenção, estamos priorizando os agendamentos na rede própria de oficinas Movida.\n\nNossas unidades oferecem aprovação mais rápida, serviço de excelente qualidade, maior conforto e, dependendo do tipo de serviço, a manutenção pode ser concluída em até 1 hora, além disso todas as oficinas ficam localizadas dentro de shoppings ou supermercados para também facilitar o acesso.\n\nDevido a lotação de nossos fornecedores estamos agendando apenas para daqui a 2 dias, porém devido a eficiência do serviço da nossa rede posso agendar para você ainda hoje se quiser.\n\nEu vi aqui que na sua cidade temos oficinas Movida, vou te passar o endereço e aí você me diz se ficar próximo para você.';
+var _pitUFsel = '';
+var _pitCidadeSel = '';
+
+// Inicializar quando entrar na página
+var _pitInited = false;
+function initPitStop(){
+  if(_pitInited) return;
+  _pitInited = true;
+  // Script
+  document.getElementById('pit-script-texto').textContent = _pitScriptTxt;
+  // UFs
+  var ufs = [...new Set((GTF.pit_stop||[]).map(function(r){return r.UF||'';}).filter(Boolean))].sort();
+  var cont = document.getElementById('pit-ufs');
+  cont.innerHTML = '';
+  ufs.forEach(function(uf){
+    var btn = document.createElement('button');
+    btn.className = 'pit-uf-btn';
+    btn.textContent = uf;
+    btn.onclick = function(){ pitSelecionaUF(uf, btn); };
+    cont.appendChild(btn);
+  });
+  // Partes — carregadas via autocomplete, sem select fixo
+}
+
+function pitTab(tab){
+  ['script','info','servico'].forEach(function(t){
+    document.getElementById('pit-'+t).style.display = t===tab ? '' : 'none';
+    var btn = document.getElementById('ptab-'+t);
+    btn.classList.toggle('ptab-active', t===tab);
+  });
+  if(tab==='script' || tab==='info' || tab==='servico') initPitStop();
+}
+
+function cpPitScript(){
+  navigator.clipboard.writeText(_pitScriptTxt).then(function(){
+    mostrarToast('Script copiado! ✓');
+  }).catch(function(){
+    var ta=document.createElement('textarea');ta.value=_pitScriptTxt;
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    mostrarToast('Script copiado! ✓');
+  });
+}
+
+function pitSelecionaUF(uf, btn){
+  _pitUFsel = uf;
+  _pitCidadeSel = '';
+  // Destacar botão UF
+  document.querySelectorAll('.pit-uf-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  // Montar cidades
+  var cidades = [...new Set((GTF.pit_stop||[]).filter(function(r){return r.UF===uf;}).map(function(r){return r.Cidade||'';}).filter(Boolean))].sort();
+  var cont = document.getElementById('pit-cidades-btns');
+  cont.innerHTML = '';
+  cidades.forEach(function(c){
+    var b = document.createElement('button');
+    b.className = 'pit-cidade-btn';
+    b.textContent = c;
+    b.onclick = function(){ pitSelecionaCidade(c, b); };
+    cont.appendChild(b);
+  });
+  document.getElementById('pit-cidades-label').textContent = 'Cidades em ' + uf;
+  document.getElementById('pit-cidades').style.display = '';
+  document.getElementById('pit-info-results').innerHTML = '';
+}
+
+function pitSelecionaCidade(cidade, btn){
+  _pitCidadeSel = cidade;
+  document.querySelectorAll('.pit-cidade-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  // Mostrar resultados
+  var lojas = (GTF.pit_stop||[]).filter(function(r){ return r.UF===_pitUFsel && r.Cidade===cidade; });
+  var h = '<div class="rmeta"><span class="rcnt">'+lojas.length+' unidade'+(lojas.length!==1?'s':'')+' em '+E(cidade)+' - '+E(_pitUFsel)+'</span></div>';
+  lojas.forEach(function(r){
+    h += '<div class="rcard" style="animation:fi .2s ease">';
+    h += '<div class="rgrid">';
+    h += '<div style="grid-column:1/-1"><div class="flbl">Nome</div><div class="fval big" style="color:var(--or)">'+E(r['Nome do fornecedor']||'')+'</div></div>';
+    h += '<div><div class="flbl">Cidade / Bairro</div><div class="fval">'+E(cidade)+(r.Bairro?' — '+E(r.Bairro):'')+'</div></div>';
+    h += '<div><div class="flbl">UF</div><div class="fval"><span class="bplaca">'+E(r.UF)+'</span></div></div>';
+    if(r['Referência']&&r['Referência']!=='Sem referência') h += '<div style="grid-column:1/-1"><div class="flbl">Referência</div><div class="fval">'+E(r['Referência'])+'</div></div>';
+    h += '<div style="grid-column:1/-1"><div class="flbl">Endereço</div><div class="fval">'+E(r['Endereço']||'')+'</div></div>';
+    h += '<div style="grid-column:1/-1"><div class="flbl">Horário de Funcionamento</div><div class="fval">'+E(r['Horário de funcionamento']||'')+'</div></div>';
+    h += '</div></div>';
+  });
+  document.getElementById('pit-info-results').innerHTML = h;
+}
+
+// Arrays globais para evitar problemas de aspas no onclick
+var _pitParteOpts = [];
+var _pitSintomaOpts = [];
+
+function pitParteKw(val){
+  var list = document.getElementById('pit-parte-list');
+  var q = N(val);
+  var partes = [...new Set((GTF.servicos_pit||[]).map(function(r){return r.Parte||'';}))].filter(Boolean).sort();
+  _pitParteOpts = q ? partes.filter(function(p){ return N(p).includes(q); }) : partes;
+  if(!_pitParteOpts.length){ list.classList.remove('open'); return; }
+  list.innerHTML = _pitParteOpts.map(function(p,i){
+    var txt = q ? E(p).replace(new RegExp('('+val.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark>$1</mark>') : E(p);
+    return '<div class="ac-item" onclick="pitSelecionaParte('+i+')">'+txt+'</div>';
+  }).join('');
+  list.classList.add('open');
+}
+
+function pitSelecionaParte(idx){
+  var parte = _pitParteOpts[idx];
+  if(!parte) return;
+  document.getElementById('pit-parte-inp').value = parte;
+  document.getElementById('pit-parte-list').classList.remove('open');
+  var res = (GTF.servicos_pit||[]).filter(function(r){ return r.Parte===parte; });
+  renderPitServicos(res, null);
+}
+
+function pitSintomaKw(val){
+  var list = document.getElementById('pit-sintoma-list');
+  var q = N(val);
+  var todos = (GTF.servicos_pit||[]);
+  var matches = q ? todos.filter(function(r){ return N(r.Sintoma||'').includes(q); }) : todos;
+  var seen = {};
+  matches = matches.filter(function(r){ if(seen[r.Sintoma]) return false; seen[r.Sintoma]=1; return true; });
+  _pitSintomaOpts = matches;
+  if(!_pitSintomaOpts.length){ list.classList.remove('open'); return; }
+  list.innerHTML = _pitSintomaOpts.map(function(r,i){
+    var txt = q ? E(r.Sintoma).replace(new RegExp('('+val.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark>$1</mark>') : E(r.Sintoma);
+    return '<div class="ac-item" onclick="pitSelecionaSintoma('+i+')">'+txt+'<span style="color:var(--tx3);font-size:11px;margin-left:6px">— '+E(r.Parte)+'</span></div>';
+  }).join('');
+  list.classList.add('open');
+}
+
+function pitSelecionaSintoma(idx){
+  var item = _pitSintomaOpts[idx];
+  if(!item) return;
+  document.getElementById('pit-sintoma-inp').value = item.Sintoma;
+  document.getElementById('pit-sintoma-list').classList.remove('open');
+  // Limpa o campo Parte — busca é independente
+  document.getElementById('pit-parte-inp').value = '';
+  // Mostra todos os sintomas da parte associada ao sintoma selecionado
+  var res = (GTF.servicos_pit||[]).filter(function(r){ return r.Parte===item.Parte; });
+  renderPitServicos(res, item.Sintoma);
+}
+
+function pitLimpar(){
+  document.getElementById('pit-parte-inp').value = '';
+  document.getElementById('pit-sintoma-inp').value = '';
+  document.getElementById('pit-parte-list').classList.remove('open');
+  document.getElementById('pit-sintoma-list').classList.remove('open');
+  document.getElementById('pit-servico-results').innerHTML = '';
+}
+
+function renderPitServicos(res, highlight){
+  if(!res.length){ noRes('pit-servico-results'); return; }
+  var partes = {};
+  res.forEach(function(r){ if(!partes[r.Parte]) partes[r.Parte]=[]; partes[r.Parte].push(r.Sintoma||''); });
+  var total = res.length;
+  var h = '<div class="rmeta"><span class="rcnt">'+total+' serviço'+(total!==1?'s':'')+(highlight?' relacionados a: <strong style="color:var(--or)">'+E(highlight)+'</strong>':'')+'</span></div>';
+  Object.keys(partes).forEach(function(parte){
+    h += '<div class="rcard" style="animation:fi .2s ease">';
+    h += '<div class="grp-lbl" style="font-size:13px;margin-bottom:10px">'+E(parte)+'</div>';
+    partes[parte].forEach(function(s,i){
+      var isHL = highlight && N(s)===N(highlight);
+      h += '<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--bdr2)' + (isHL ? ';background:rgba(255,102,0,.1);margin:0 -6px;padding:9px 6px;border-radius:7px' : '') + '">';
+      h += '<span style="min-width:22px;font-size:12px;font-weight:700;color:var(--or);margin-top:1px">'+(i+1)+'.</span>';
+      h += '<span style="font-size:14px;color:'+(isHL?'var(--orl)':'var(--tx)')+';font-weight:'+(isHL?'700':'400')+'">'+E(s)+'</span>';
+      if(isHL) h += '<span style="margin-left:auto;font-size:11px;background:var(--or);color:#fff;border-radius:5px;padding:2px 8px;font-weight:700;flex-shrink:0">selecionado</span>';
+      h += '</div>';
+    });
+    h += '</div>';
+  });
+  document.getElementById('pit-servico-results').innerHTML = h;
+}
+
+// Fechar autocomplete Pit Stop ao clicar fora
+document.addEventListener('click',function(e){
+  if(!e.target.closest('#pit-parte-inp')&&!e.target.closest('#pit-parte-list'))
+    document.getElementById('pit-parte-list').classList.remove('open');
+  if(!e.target.closest('#pit-sintoma-inp')&&!e.target.closest('#pit-sintoma-list'))
+    document.getElementById('pit-sintoma-list').classList.remove('open');
+});
+
 </script>
 </body>
 </html>
