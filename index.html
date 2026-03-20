@@ -1198,12 +1198,75 @@ function searchScript(){
   var h='';
   res.forEach(function(r,i){
     var bid='scb'+i;
+    var resposta = r.Resposta||'';
     h+='<div class="rcard">';
     h+='<div class="flbl">Tipo</div><div class="fval" style="margin-bottom:6px">'+E(r['Padrão ou Script'])+'</div>';
     h+='<div class="flbl">Solicitação</div><div class="fval big" style="margin-bottom:10px">'+E(r.SOLICITAÇÃO)+'</div>';
     h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div class="flbl" style="margin:0">Resposta</div>';
     h+='<button id="'+bid+'" onclick="copiarScript(\''+bid+'\','+i+')" style="background:transparent;border:1px solid var(--bdr);color:var(--tx2);border-radius:7px;padding:4px 11px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">📋 Copiar</button></div>';
-    h+='<div class="tblock">'+E(r.Resposta)+'</div></div>';
+
+    // Alfabeto fonético — 3 colunas com letra em destaque
+    if(sol==='Alfabeto fonético'){
+      var itens = resposta.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+      var col = Math.ceil(itens.length/3);
+      h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 16px;padding:12px;background:var(--bg3);border-radius:8px;border-left:3px solid var(--or)">';
+      itens.forEach(function(linha){
+        // Separa letra da palavra: "A - Alpha"
+        var m = linha.match(/^([A-Z])\s*[-–]\s*(.+)$/);
+        if(m){
+          h+='<div style="display:flex;align-items:center;gap:8px;padding:5px 0">';
+          h+='<span style="font-size:18px;font-weight:800;color:var(--or);min-width:24px">'+E(m[1])+'</span>';
+          h+='<span style="font-size:13px;color:var(--tx2)">'+E(m[2].trim())+'</span>';
+          h+='</div>';
+        } else {
+          h+='<div style="padding:5px 0;font-size:13px;color:var(--tx2)">'+E(linha)+'</div>';
+        }
+      });
+      h+='</div>';
+
+    // Código de atividade — sigla em destaque
+    } else if(sol==='Cód. de ativididade'){
+      var linhas = resposta.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+      h+='<div style="display:flex;flex-direction:column;gap:4px;padding:12px;background:var(--bg3);border-radius:8px;border-left:3px solid var(--or)">';
+      linhas.forEach(function(linha){
+        // Separa sigla do resto: "MP - PREVENTIVA..."
+        var m = linha.match(/^([A-Z]+)\s*[-–]\s*(.+)$/);
+        if(m){
+          h+='<div style="display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid var(--bdr2)">';
+          h+='<span style="font-size:14px;font-weight:800;color:var(--or);min-width:36px;flex-shrink:0">'+E(m[1])+'</span>';
+          h+='<span style="font-size:13px;color:var(--tx);line-height:1.5">'+E(m[2].trim())+'</span>';
+          h+='</div>';
+        } else {
+          h+='<div style="padding:7px 0;font-size:13px;color:var(--tx2);border-bottom:1px solid var(--bdr2)">'+E(linha)+'</div>';
+        }
+      });
+      h+='</div>';
+
+    // Status GEO — texto antes de ":" em destaque
+    } else if(sol==='Status de OS GEO'){
+      var linhas = resposta.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+      h+='<div style="display:flex;flex-direction:column;gap:4px;padding:12px;background:var(--bg3);border-radius:8px;border-left:3px solid var(--or)">';
+      linhas.forEach(function(linha){
+        var idx = linha.indexOf(':');
+        if(idx > -1){
+          var status = linha.substring(0, idx).trim();
+          var desc   = linha.substring(idx+1).trim();
+          h+='<div style="padding:8px 0;border-bottom:1px solid var(--bdr2)">';
+          h+='<div style="font-size:14px;font-weight:700;color:var(--orl);margin-bottom:3px">'+E(status)+'</div>';
+          h+='<div style="font-size:13px;color:var(--tx2);line-height:1.5">'+E(desc)+'</div>';
+          h+='</div>';
+        } else {
+          h+='<div style="padding:8px 0;font-size:13px;color:var(--tx2)">'+E(linha)+'</div>';
+        }
+      });
+      h+='</div>';
+
+    // Demais — tblock padrão
+    } else {
+      h+='<div class="tblock">'+E(resposta)+'</div>';
+    }
+
+    h+='</div>';
   });
   document.getElementById('sc-results').innerHTML=h;
 }
